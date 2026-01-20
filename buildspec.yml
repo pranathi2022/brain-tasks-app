@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-south-1
+    CLUSTER_NAME: react-eks-cluster
+    ECR_REPO: project_reactapp
+    ACCOUNT_ID: 879112120054
+
+phases:
+  install:
+    commands:
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.28.0/2023-11-14/bin/linux/amd64/kubectl
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+
+  pre_build:
+    commands:
+      - aws eks update-kubeconfig --name $CLUSTER_NAME --region $AWS_REGION
+      - aws ecr get-login-password --region $AWS_REGION |
+        docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+  build:
+    commands:
+      - docker build -t $ECR_REPO .
+      - docker tag $ECR_REPO:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+      - docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+
+artifacts:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - appspec.yml
