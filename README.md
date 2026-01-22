@@ -1,12 +1,12 @@
 # Brain Tasks App – Deployment on AWS EKS
 
-This repository contains the complete setup to deploy a React application to a production-ready environment using Docker, Amazon ECR, Amazon EKS, and an automated CI/CD pipeline built with AWS CodePipeline and CodeBuild.
+This repository contains the complete setup to deploy a React application to a production-ready environment using Docker, Amazon ECR, Amazon EKS cluster, and an automated CI/CD pipeline built with AWS CodePipeline and CodeBuild.
 
 ---
 
 ## 🚀 Application Overview
 
-- **Application Type**: React
+- **Application Type**: React 
 - **Application Port**: 3000
 - **Deployment Platform**: Kubernetes (Amazon EKS)
 - **Container Runtime**: Docker
