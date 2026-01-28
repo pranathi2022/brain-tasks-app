@@ -6,33 +6,47 @@ env:
     CLUSTER_NAME: react-eks-cluster
     ECR_REPO: project_reactapp
     ACCOUNT_ID: 879112120054
+    KUBECONFIG: /root/.kube/config
 
 phases:
   install:
     commands:
       - echo Installing kubectl...
-      - curl -LO "https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl"
+      - curl -LO https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl
       - chmod +x kubectl
       - mv kubectl /usr/local/bin/kubectl
       - kubectl version --client
 
-
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo Who am I?
+      - aws sts get-caller-identity
+
+      - echo Creating kube directory
+      - mkdir -p /root/.kube
+
+      - echo Updating kubeconfig for EKS
+      - aws eks update-kubeconfig \
+          --region $AWS_REGION \
+          --name $CLUSTER_NAME \
+          --kubeconfig $KUBECONFIG
+
+      - echo Verifying kubeconfig
+      - kubectl config current-context
+      - kubectl get nodes
+
+      - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-      - echo Updating kubeconfig for EKS...
-      - aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
 
   build:
     commands:
-      - echo Building Docker image...
+      - echo Building Docker image
       - docker build -t $ECR_REPO:latest .
       - docker tag $ECR_REPO:latest $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
       - docker push $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
 
   post_build:
     commands:
-      - echo Deploying to EKS...
+      - echo Deploying to EKS
       - kubectl apply -f deployment.yaml
       - kubectl apply -f service.yaml
