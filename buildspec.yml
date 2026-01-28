@@ -10,16 +10,14 @@ env:
 
 phases:
   install:
-  commands:
-    - echo Installing AWS CLI v2
-    - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-    - unzip -q awscliv2.zip
-    - ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-
-    - aws --version
-  install:
     commands:
-      - echo Installing kubectl...
+      - echo Installing AWS CLI v2
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip -q awscliv2.zip
+      - ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+      - aws --version
+
+      - echo Installing kubectl
       - curl -LO https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl
       - chmod +x kubectl
       - mv kubectl /usr/local/bin/kubectl
@@ -27,7 +25,7 @@ phases:
 
   pre_build:
     commands:
-      - echo Who am I?
+      - echo Verifying IAM identity
       - aws sts get-caller-identity
 
       - echo Creating kube directory
@@ -36,13 +34,12 @@ phases:
       - echo Updating kubeconfig for EKS
       - aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
 
-      - echo Verifying kubeconfig
+      - echo Verifying Kubernetes access
       - kubectl config current-context
       - kubectl get nodes
 
       - echo Logging in to Amazon ECR
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
-
 
   build:
     commands:
