@@ -1,91 +1,89 @@
-# Brain Tasks App – Deployment on AWS EKS
+# Project brain-tasks-app – CI/CD to AWS EKS using ECR + CodeBuild + CodePipeline
 
-This repository contains the complete setup to deploy a React application to a production-ready environment using Docker, Amazon ECR, Amazon EKS cluster, and an automated CI/CD pipeline built with AWS CodePipeline and CodeBuild.
+## Overview
+This project demonstrates how to containerize an application, store images in AWS ECR, deploy into AWS EKS using Kubernetes manifests, and automate the workflow using AWS CodePipeline and CodeBuild.
 
----
-
-## 🚀 Application Overview
-
-- **Application Type**: React 
-- **Application Port**: 3000
-- **Deployment Platform**: Kubernetes (Amazon EKS)
-- **Container Runtime**: Docker
+It includes monitoring and logs tracking using AWS CloudWatch.
 
 ---
 
-## 🏗️ Architecture Overview
+## What I Implemented
 
-GitHub Repository  
-→ AWS CodePipeline  
-→ AWS CodeBuild  
-→ Docker Image Build  
-→ Amazon ECR  
-→ kubectl Deployment  
-→ Amazon EKS  
-→ Kubernetes LoadBalancer  
+### 1) Application Setup
+- Cloned the given Git repository.
+- Built the application and verified it runs correctly on the required port.
 
 ---
 
-## 🧰 Tools & Services Used
-
-- :contentReference[oaicite:0]{index=0} – Version control
-- :contentReference[oaicite:1]{index=1} – Containerization
-- :contentReference[oaicite:2]{index=2} – Docker image storage
-- :contentReference[oaicite:3]{index=3} – Kubernetes cluster
-- :contentReference[oaicite:4]{index=4} – CI/CD orchestration
-- :contentReference[oaicite:5]{index=5} – Build & deployment execution
-- :contentReference[oaicite:6]{index=6} – Logging & monitoring
+### 2) Dockerization
+- Created a Dockerfile for the application.
+- Built and tested the docker image locally.
+- Verified output by running the container.
 
 ---
 
-## 📦 Dockerization
-
-The React application is containerized using Docker and served via **Nginx**.
-
-### Docker Highlights
-- Production-ready `nginx:alpine` base image
-- Application served on **port 3000**
-- Optimized static file serving
+### 3) AWS ECR (Elastic Container Registry)
+- Created an AWS ECR repository.
+- Authenticated Docker to ECR.
+- Tagged and pushed the image successfully into ECR.
 
 ---
 
-## ☸️ Kubernetes Deployment
-
-### Deployment
-- Runs multiple replicas for high availability
-- Pulls Docker image from Amazon ECR
-
-### Service
-- Type: `LoadBalancer`
-- Exposes application to the internet via AWS Load Balancer
+### 4) AWS EKS (Kubernetes Cluster)
+- Created an AWS EKS cluster with worker nodes.
+- Verified cluster and node status using kubectl commands.
 
 ---
 
-## 🔁 CI/CD Pipeline Explanation
-
-### Source Stage
-- GitHub repository is connected to AWS CodePipeline
-- Pipeline triggers automatically on code push
-
-### Build & Deploy Stage (CodeBuild)
-AWS CodeBuild performs the following actions:
-1. Builds the Docker image
-2. Pushes the image to Amazon ECR
-3. Configures access to the EKS cluster using `kubectl`
-4. Deploys the application using Kubernetes manifests
-
-> ⚠️ **Note on CodeDeploy**  
-> AWS CodeDeploy does not provide native EKS support in this account/region.  
-> Deployment to EKS is therefore implemented using **kubectl as a custom deployment script via CodeBuild**, which is an AWS-recommended and industry-standard approach.
+### 5) Kubernetes Deployment
+- Created Kubernetes YAML files:
+  - `deployment.yaml`
+  - `service.yaml`
+- Deployed application to EKS using:
+  - `kubectl apply`
+- Verified pods and services are running.
+- Confirmed LoadBalancer service created successfully.
 
 ---
 
-## 🧾 buildspec.yml Responsibilities
+### 6) AWS CodeBuild
+- Created a CodeBuild project.
+- Connected it to the source repository.
+- Used a managed environment image.
+- Wrote `buildspec.yml` to automate:
+  - Docker build
+  - ECR push
+  - Kubernetes deployment commands
 
-- Install `kubectl`
-- Authenticate with Amazon ECR
-- Build and push Docker image
-- Deploy Kubernetes manifests using:
-  ```bash
-  kubectl apply -f deployment.yaml
-  kubectl apply -f service.yaml
+---
+
+### 7) AWS CodePipeline
+- Created a CodePipeline pipeline with:
+  - Source stage (GitHub)
+  - Build stage (CodeBuild)
+  - Deploy stage (EKS deployment)
+
+---
+
+### 8) Monitoring using CloudWatch Logs
+- Verified CodeBuild execution logs inside CloudWatch.
+- Verified deployment logs and pod logs.
+- Used kubectl logs for application troubleshooting.
+
+---
+
+## Proof / Screenshots Included
+The repository includes screenshots for:
+- Docker build and run output
+- ECR repository creation and image push
+- EKS cluster and node status
+- Kubernetes deployment and service output
+- CodeBuild project configuration and logs
+- CodePipeline execution flow
+- LoadBalancer deployment proof
+- CloudWatch logs
+
+---
+
+## Conclusion
+This project demonstrates a complete AWS-native CI/CD pipeline that builds docker images, stores them in ECR, deploys to EKS, and tracks logs using CloudWatch.
